@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../models/onboarding_model.dart';
-import 'widgets/onboarding_page.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../welcome_screen.dart';
+import 'onboarding_data.dart';
+import 'onboarding_widget.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -10,85 +12,107 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  final List<OnboardingModel> _pages = [
-    OnboardingModel(
-      image: 'assets/images/onboarding1.png',
-      title: 'Learn Anywhere, Anytime',
-      description: 'Study smart with AI-powered personalized guidance.',
-    ),
-    OnboardingModel(
-      image: 'assets/images/onboarding2.png',
-      title: 'Track Your Progress',
-      description: 'Monitor your scores and understand your strengths.',
-    ),
-    OnboardingModel(
-      image: 'assets/images/onboarding3.png',
-      title: 'Ace Your Exams',
-      description: 'Focus on weak topics and boost your confidence.',
-    ),
-  ];
-
-  void _onNext() {
-    if (_currentPage < _pages.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
-    } else {
-      // Navigate to Login or Home Screen
-      Navigator.pushReplacementNamed(context, '/login');
-    }
-  }
+  final PageController _controller = PageController();
+  bool onLastPage = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: _pages.length,
-        onPageChanged: (index) => setState(() => _currentPage = index),
-        itemBuilder: (context, index) {
-          return OnboardingPage(
-            image: _pages[index].image,
-            title: _pages[index].title,
-            description: _pages[index].description,
-          );
-        },
-      ),
-      bottomSheet: Container(
-        height: 70,
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () =>
-                  Navigator.pushReplacementNamed(context, '/login'),
-              child: const Text('Skip'),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _controller,
+            itemCount: onboardingPages.length,
+            onPageChanged: (index) {
+              setState(() => onLastPage = index == onboardingPages.length - 1);
+            },
+            itemBuilder: (_, i) => OnboardingWidget(
+              content: onboardingPages[i],
+              onNext: () {
+                if (onLastPage) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (_) => WelcomeScreen()));
+                } else {
+                  _controller.nextPage(
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.ease,
+                  );
+                }
+              },
             ),
-            Row(
-              children: List.generate(
-                _pages.length,
-                (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: _currentPage == index ? 16 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _currentPage == index ? Colors.blue : Colors.grey,
-                    borderRadius: BorderRadius.circular(4),
+          ),
+
+          // 🔹 Skip button at top-right
+          Positioned(
+            top: 25,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 202, 202, 202),
+                borderRadius: BorderRadius.circular(60),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 5,
+                    offset: Offset(1, 2),
                   ),
+                ],
+              ),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => WelcomeScreen()),
+                  );
+                },
+                child: const Text(
+                  "Skip",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
-            ElevatedButton(
-              onPressed: _onNext,
-              child: Text(_currentPage == _pages.length - 1 ? 'Start' : 'Next'),
+          ),
+          // Page indicator
+          Positioned(
+            bottom: 40,
+            left: 20,
+            child: SmoothPageIndicator(
+              controller: _controller,
+              count: onboardingPages.length,
+              effect: const ExpandingDotsEffect(
+                dotColor: Colors.grey,
+                activeDotColor: Colors.blue,
+              ),
             ),
-          ],
-        ),
+          ),
+
+          // Next button
+          Positioned(
+            bottom: 30,
+            right: 20,
+            child: FloatingActionButton(
+              backgroundColor: Colors.blue,
+              shape: const CircleBorder(),
+              child: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                if (onLastPage) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (_) => WelcomeScreen()));
+                } else {
+                  _controller.nextPage(
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.ease,
+                  );
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
