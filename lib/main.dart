@@ -13,7 +13,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EasyLearning App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: "Roboto"),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        primaryColor: Colors.blue,
+        splashColor: Colors.blue.withOpacity(0.2),
+        highlightColor: Colors.blue.withOpacity(0.1),
+        useMaterial3: true,
+        inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue, width: 2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
       home: SplashScreen(),
     );
   }

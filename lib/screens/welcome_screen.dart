@@ -45,7 +45,8 @@ class WelcomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 45,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: 'OpenSans',
+                      fontWeight: FontWeight.w900,
                       color: Colors.white,
                       shadows: [
                         Shadow(blurRadius: 10, color: Colors.black45),
@@ -78,8 +79,7 @@ class WelcomeScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (_) => const SignUpScreen()),
+                            MaterialPageRoute(builder: (_) => SignUpScreen()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
