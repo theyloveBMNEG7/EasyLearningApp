@@ -9,7 +9,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 🖼 Background Image
+          // Background Image
           SizedBox.expand(
             child: Image.asset(
               'assets/images/Books.jpeg',
@@ -17,12 +17,12 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
 
-          // 🔲 Overlay Color (optional for contrast)
+          // Overlay Color (optional for contrast)
           Container(
             color: Colors.black.withOpacity(0.3),
           ),
 
-          // 📦 Main Content
+          // Main Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -31,7 +31,7 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   const Spacer(),
 
-                  // 🟨 App Logo
+                  // App Logo
                   Image.asset(
                     'assets/images/splashscreen.png',
                     height: 220,
@@ -39,7 +39,7 @@ class WelcomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 25),
 
-                  // 👋 Welcome Text
+                  // Welcome Text
                   const Text(
                     'Welcome to EasyLearning !!',
                     textAlign: TextAlign.center,
@@ -55,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 50),
 
-                  // 📜 Subtitle
+                  // Subtitle
                   const Text(
                     'We are happy to have you here. EasyLearning accompanies in the preparation of your exams',
                     textAlign: TextAlign.center,
@@ -67,7 +67,7 @@ class WelcomeScreen extends StatelessWidget {
 
                   const Spacer(),
 
-                  // 👉 "Get Started" Button
+                  // "Get Started" Button
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32.0, vertical: 40),

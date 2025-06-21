@@ -116,7 +116,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
               // Show image last only for slide 2
               if (isSecondSlide)
                 Expanded(
-                  flex: 5, // 🔺 Increased size
+                  flex: 5, //  Increased size
                   child: Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child:
