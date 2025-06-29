@@ -48,12 +48,17 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkFirstTimeUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final onboardingSeen = prefs.getBool('onboarding_shown') ?? false;
+    final hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     Timer(const Duration(seconds: 3), () {
-      final nextRoute =
-          onboardingSeen ? RoutePaths.onboarding : RoutePaths.onboarding;
-      Navigator.pushReplacementNamed(context, nextRoute);
+      if (isLoggedIn) {
+        Navigator.pushReplacementNamed(context, RoutePaths.studentDashboard);
+      } else if (!hasSeenIntro) {
+        Navigator.pushReplacementNamed(context, RoutePaths.onboarding);
+      } else {
+        Navigator.pushReplacementNamed(context, RoutePaths.welcome);
+      }
     });
   }
 
@@ -80,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen>
                   scale: _logoAnimation,
                   child: Image.asset(
                     'assets/images/splashscreen.png',
-                    height: 250,
+                    height: 230,
                   ),
                 ),
               ),

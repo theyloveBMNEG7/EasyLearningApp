@@ -16,17 +16,22 @@ class RecentCoursesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Recent Courses',
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.w900,
-            fontFamily: 'OpenSans',
+        // Section Title
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: Text(
+            'Recent Courses',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenSans',
+            ),
           ),
         ),
-        const SizedBox(height: 18),
+
+        // Horizontal Course List
         SizedBox(
-          height: 100,
+          height: 110,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _courses.length,
@@ -37,17 +42,16 @@ class RecentCoursesSection extends StatelessWidget {
 
               return Material(
                 elevation: 3,
-                borderRadius: BorderRadius.circular(16),
                 color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
                 child: Container(
                   width: 180,
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Course title + check if completed
                       Row(
                         children: [
                           Expanded(
@@ -55,19 +59,26 @@ class RecentCoursesSection extends StatelessWidget {
                               course['title'],
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 16,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (progress == 1.0)
-                            const FaIcon(
-                              FontAwesomeIcons.circleCheck,
-                              color: Colors.green,
-                              size: 18,
+                            const Padding(
+                              padding: EdgeInsets.only(left: 4),
+                              child: FaIcon(
+                                FontAwesomeIcons.circleCheck,
+                                color: Colors.green,
+                                size: 16,
+                              ),
                             ),
                         ],
                       ),
+
                       const Spacer(),
+
+                      // Progress text
                       Text(
                         '${(progress * 100).toInt()}% completed',
                         style: const TextStyle(
@@ -75,7 +86,10 @@ class RecentCoursesSection extends StatelessWidget {
                           color: Colors.black54,
                         ),
                       ),
+
                       const SizedBox(height: 6),
+
+                      // Progress bar
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
                         child: LinearProgressIndicator(

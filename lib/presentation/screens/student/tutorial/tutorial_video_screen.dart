@@ -18,14 +18,21 @@ class TutorialVideoScreen extends StatefulWidget {
 class _TutorialVideoScreenState extends State<TutorialVideoScreen> {
   late final VideoPlayerController _controller;
   bool _isInitialized = false;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
-        setState(() => _isInitialized = true);
-        _controller.play();
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+          });
+          _controller.play();
+        }
+      }).catchError((e) {
+        setState(() => _hasError = true);
       });
   }
 
@@ -42,16 +49,38 @@ class _TutorialVideoScreenState extends State<TutorialVideoScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         title: Text(widget.title),
+        backgroundColor: Colors.black87,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Center(
-        child: _isInitialized
-            ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+        child: _hasError
+            ? const Text(
+                'Failed to load video.',
+                style: TextStyle(color: Colors.white),
               )
-            : const CircularProgressIndicator(color: Colors.white),
+            : _isInitialized
+                ? GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isPlaying ? _controller.pause() : _controller.play();
+                      });
+                    },
+                    child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          VideoPlayer(_controller),
+                          if (!isPlaying)
+                            const Icon(Icons.play_circle_filled,
+                                size: 64, color: Colors.white70),
+                        ],
+                      ),
+                    ),
+                  )
+                : const CircularProgressIndicator(color: Colors.white),
       ),
       floatingActionButton: _isInitialized
           ? FloatingActionButton(

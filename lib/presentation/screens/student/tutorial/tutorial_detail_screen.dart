@@ -12,21 +12,22 @@ class TutorialDetailScreen extends StatelessWidget {
     final theme = Theme.of(context);
     const int completed = 3;
     const int total = 10;
-    final progress = completed / total;
+    final double progress = completed / total;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0.3,
+        elevation: 0.5,
         centerTitle: true,
+        backgroundColor: theme.colorScheme.surface,
+        leading: const BackButton(color: Colors.black),
         title: Text(
           tutorial.title,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            color: Colors.black87,
           ),
         ),
-        leading: const BackButton(color: Colors.black),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 12),
@@ -36,8 +37,9 @@ class TutorialDetailScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Preview video
+            // Video preview
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -57,7 +59,8 @@ class TutorialDetailScreen extends StatelessWidget {
                     aspectRatio: 16 / 9,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(14)),
+                        bottom: Radius.circular(16),
+                      ),
                       child: Image.asset(
                         tutorial.image,
                         width: double.infinity,
@@ -66,9 +69,9 @@ class TutorialDetailScreen extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Colors.black45,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     padding: const EdgeInsets.all(8),
                     child: const Icon(Icons.play_arrow,
@@ -103,14 +106,14 @@ class TutorialDetailScreen extends StatelessWidget {
             ),
 
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: Text(
                 'Lessons',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
               ),
             ),
 
-            // Lessons list
+            // Lessons List
             Expanded(
               child: ListView.separated(
                 padding:
@@ -119,13 +122,14 @@ class TutorialDetailScreen extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, index) {
                   return Card(
-                    elevation: 0.3,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    elevation: 1,
+                    shadowColor: Colors.black12,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 10),
+                          horizontal: 14, vertical: 10),
                       leading: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.asset(
@@ -143,12 +147,14 @@ class TutorialDetailScreen extends StatelessWidget {
                       ),
                       subtitle: Text(
                         'Admin • ${300 + index * 200} views • ${index + 2} days ago',
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.black54,
+                        ),
                       ),
                       trailing:
                           const Icon(Icons.arrow_forward_ios_rounded, size: 16),
                       onTap: () {
-                        // TODO: Handle individual lesson play (if added)
+                        // TODO: Handle individual lesson play
                       },
                     ),
                   );

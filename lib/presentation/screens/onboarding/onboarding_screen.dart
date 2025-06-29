@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-//import '../auth/signup_screen.dart';
 import '../welcome/welcome_screen.dart';
 import 'onboarding_data.dart';
 import 'onboarding_widget.dart';
@@ -19,7 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_shown', true);
+    await prefs.setBool('hasSeenIntro', true);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const WelcomeScreen()),

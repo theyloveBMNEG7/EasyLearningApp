@@ -41,18 +41,20 @@ class _TutorialsScreenState extends State<TutorialsScreen>
     super.dispose();
   }
 
-  Widget buildCourseCard(Map<String, dynamic> t) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 2,
+  Widget buildCourseCard(Map<String, dynamic> tutorial) {
+    return Material(
+      borderRadius: BorderRadius.circular(16),
+      color: Colors.white,
+      elevation: 3,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => TutorialVideoScreen(
-                title: t['title'],
-                videoUrl: t['videoUrl'],
+                title: tutorial['title'],
+                videoUrl: tutorial['videoUrl'],
               ),
             ),
           );
@@ -61,16 +63,15 @@ class _TutorialsScreenState extends State<TutorialsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Thumbnail
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(14)),
+            SizedBox(
+              height: 110,
+              width: double.infinity,
               child: Image.asset(
-                t['image'],
-                height: 100,
-                width: double.infinity,
+                tutorial['image'],
                 fit: BoxFit.cover,
               ),
             ),
+
             // Content
             Padding(
               padding: const EdgeInsets.all(10),
@@ -78,21 +79,28 @@ class _TutorialsScreenState extends State<TutorialsScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    t['title'],
+                    tutorial['title'],
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w600),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 14, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text('${t['rating']}'),
-                      const Spacer(),
-                      const Icon(Icons.person, size: 14, color: Colors.black54),
+                      // Star rating
+                      Icon(Icons.star, size: 14, color: Colors.amber[700]),
                       const SizedBox(width: 4),
                       Text(
-                        t['students'],
+                        tutorial['rating'].toString(),
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w500),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.person, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        tutorial['students'],
                         style: const TextStyle(
                             fontSize: 12, color: Colors.black54),
                       ),
@@ -111,24 +119,31 @@ class _TutorialsScreenState extends State<TutorialsScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
         toolbarHeight: 90,
-        elevation: 0.5,
+        elevation: 1,
         title: const Text(
           'Search Tutorials',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: theme.colorScheme.surface,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: theme.colorScheme.primary,
-          unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
-          indicatorColor: theme.colorScheme.primary,
-          tabs: const [
-            Tab(text: 'Tutorials'),
-            Tab(text: 'Books'),
-          ],
+        backgroundColor: Colors.white,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: theme.colorScheme.primary,
+              unselectedLabelColor: Colors.grey,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+              indicatorColor: theme.colorScheme.primary,
+              tabs: const [
+                Tab(text: 'Tutorials'),
+                Tab(text: 'Books'),
+              ],
+            ),
+          ),
         ),
       ),
       body: TabBarView(
@@ -140,14 +155,19 @@ class _TutorialsScreenState extends State<TutorialsScreen>
               itemCount: tutorials.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 14,
-                crossAxisSpacing: 14,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
                 childAspectRatio: 0.75,
               ),
               itemBuilder: (_, i) => buildCourseCard(tutorials[i]),
             ),
           ),
-          const Center(child: Text('Books section coming soon 📚')),
+          const Center(
+            child: Text(
+              '📚 Books section coming soon!',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ),
         ],
       ),
     );

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../screens/student/dashboard/student_dashboard.dart';
 import '../../screens/student/tutorial/tutorials_screen.dart';
-import '../../screens/student/quiz_screen.dart';
+import '../../screens/student/quiz/quiz_screen.dart';
 import '../../screens/student/corrections_screen.dart';
 import '../../screens/student/student_profile.dart';
+import '../../../presentation/widgets/common/student_drawer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class StudentLayout extends StatefulWidget {
@@ -27,7 +28,7 @@ class _StudentLayoutState extends State<StudentLayout> {
   final List<Widget> _tabs = const [
     StudentDashboard(),
     TutorialsScreen(),
-    //QuizScreen(),
+    QuizScreen(),
     //CorrectionsScreen(),
     //StudentProfile(),
   ];
@@ -48,6 +49,7 @@ class _StudentLayoutState extends State<StudentLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const StudentDrawer(),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         child: _tabs[_index],

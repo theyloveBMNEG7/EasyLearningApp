@@ -34,26 +34,28 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black12)],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [BoxShadow(blurRadius: 8, color: Colors.black12)],
       ),
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Weekly Progress',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'OpenSans',
-                  )),
+              const Text(
+                'Weekly Progress',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                ),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
@@ -63,26 +65,26 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _selectedWeek,
-                    items: _weeklyData.keys
-                        .map((week) => DropdownMenuItem(
-                              value: week,
-                              child: Text(week),
-                            ))
-                        .toList(),
                     onChanged: (value) =>
                         setState(() => _selectedWeek = value!),
+                    items: _weeklyData.keys.map((week) {
+                      return DropdownMenuItem(value: week, child: Text(week));
+                    }).toList(),
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                    icon: const Icon(Icons.arrow_drop_down),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
 
-          // Bar chart container
+          const SizedBox(height: 20),
+
+          // 📈 Bar Chart Section
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50.withOpacity(0.3),
+              color: Colors.blue.shade50.withOpacity(0.25),
               borderRadius: BorderRadius.circular(12),
             ),
             child: SizedBox(
@@ -99,12 +101,12 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 32,
                         getTitlesWidget: (value, _) {
+                          if (value < 0 || value > 6)
+                            return const SizedBox.shrink();
                           return Text(
                             _days[value.toInt()],
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w500),
+                            style: const TextStyle(fontSize: 12),
                           );
                         },
                       ),
@@ -135,7 +137,7 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
 
           const SizedBox(height: 24),
 
-          // Circular ring container
+          // Progress Ring Chart
           Container(
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
@@ -145,22 +147,17 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Ring Painter
                 CustomPaint(
                   size: const Size(120, 120),
                   painter: SegmentedRingPainter(
-                    segments: [
-                      progressData['Completed']!,
-                      progressData['In Progress']!,
-                      progressData['Started']!,
-                    ],
-                    colors: [
-                      progressColors['Completed']!,
-                      progressColors['In Progress']!,
-                      progressColors['Started']!,
-                    ],
+                    segments: progressData.values.toList(),
+                    colors: progressColors.values.toList(),
                   ),
                 ),
                 const SizedBox(width: 24),
+
+                // Labels
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: progressData.entries.map((entry) {
@@ -192,6 +189,7 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
   }
 }
 
+// Custom Ring Painter
 class SegmentedRingPainter extends CustomPainter {
   final List<double> segments;
   final List<Color> colors;
@@ -207,21 +205,21 @@ class SegmentedRingPainter extends CustomPainter {
     double startAngle = -pi / 2;
 
     for (int i = 0; i < segments.length; i++) {
-      final sweep = (segments[i] / total) * 2 * pi;
+      final sweepAngle = (segments[i] / total) * 2 * pi;
       final paint = Paint()
-        ..strokeWidth = strokeWidth
-        ..style = PaintingStyle.stroke
         ..color = colors[i]
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round;
 
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
         startAngle,
-        sweep,
+        sweepAngle,
         false,
         paint,
       );
-      startAngle += sweep;
+      startAngle += sweepAngle;
     }
   }
 

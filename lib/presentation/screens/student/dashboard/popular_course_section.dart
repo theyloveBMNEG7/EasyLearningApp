@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../layouts/student/student_layout.dart';
 
-class PastQuestionSection extends StatelessWidget {
-  const PastQuestionSection({super.key});
+class PopularCoursesSection extends StatelessWidget {
+  const PopularCoursesSection({super.key});
 
-  final List<Map<String, String>> _pastPapers = const [
+  final List<Map<String, String>> _pastCourses = const [
     {
       'subject': 'Biology',
       'file': 'bio_2024.pdf',
@@ -70,7 +70,7 @@ class PastQuestionSection extends StatelessWidget {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _pastPapers.length,
+          itemCount: _pastCourses.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 12,
@@ -78,7 +78,7 @@ class PastQuestionSection extends StatelessWidget {
             childAspectRatio: 0.9,
           ),
           itemBuilder: (context, index) {
-            final paper = _pastPapers[index];
+            final paper = _pastCourses[index];
 
             return Material(
               borderRadius: BorderRadius.circular(14),
@@ -110,7 +110,7 @@ class PastQuestionSection extends StatelessWidget {
                           child: Text(
                             paper['subject']!,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -138,12 +138,6 @@ class PastQuestionSection extends StatelessWidget {
                                   size: 15,
                                   color: Colors.blueAccent),
                               tooltip: 'Share',
-                              onPressed: () {},
-                            ),
-                            IconButton(
-                              icon: const FaIcon(FontAwesomeIcons.trashCan,
-                                  size: 15, color: Colors.redAccent),
-                              tooltip: 'Delete',
                               onPressed: () {},
                             ),
                           ],

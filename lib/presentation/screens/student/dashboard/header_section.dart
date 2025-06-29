@@ -6,85 +6,120 @@ class HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SizedBox(
-          height: 12,
-        ),
-        const CircleAvatar(
-          radius: 26,
-          backgroundImage: AssetImage('assets/images/student_avatar.png'),
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text("Hi, welcome back",
-                  style: TextStyle(color: Color.fromARGB(255, 131, 131, 131))),
-              Text("Emmanuel",
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontFamily: 'OpenSans',
-                      fontWeight: FontWeight.w900)),
-            ],
-          ),
-        ),
-        IconButton(
-          icon: FaIcon(FontAwesomeIcons.bell),
-          onPressed: () {
-            Navigator.pushNamed(context, '/notifications');
-          },
-        ),
-        PopupMenuButton<String>(
-          icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
-          onSelected: (value) {
-            // handle actions
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'profile',
-              child: Row(
+    final theme = Theme.of(context);
+
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Drawer Icon
+            IconButton(
+              icon: const Icon(Icons.menu_rounded, size: 28),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              splashRadius: 22,
+            ),
+
+            const SizedBox(width: 10),
+
+            // Avatar
+            const CircleAvatar(
+              radius: 24,
+              backgroundImage: AssetImage('assets/images/student_avatar.png'),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Greeting
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  FaIcon(FontAwesomeIcons.user, size: 16),
-                  SizedBox(width: 10),
-                  Text('Profile'),
+                  Text(
+                    "Hi, welcome back.",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  Text(
+                    "Emmanuel",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
             ),
-            PopupMenuItem(
-              value: 'settings',
-              child: Row(
-                children: const [
-                  FaIcon(FontAwesomeIcons.gear, size: 16),
-                  SizedBox(width: 10),
-                  Text('Settings'),
-                ],
-              ),
+
+            // Notification Button
+            IconButton(
+              icon: const FaIcon(FontAwesomeIcons.bell, size: 18),
+              onPressed: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+              tooltip: "Notifications",
+              splashRadius: 20,
             ),
-            PopupMenuItem(
-              value: 'help',
-              child: Row(
-                children: const [
-                  FaIcon(FontAwesomeIcons.circleQuestion, size: 16),
-                  SizedBox(width: 10),
-                  Text('Help'),
-                ],
+
+            // Overflow Menu
+            PopupMenuButton<String>(
+              tooltip: "More options",
+              icon: const FaIcon(FontAwesomeIcons.ellipsisVertical, size: 18),
+              onSelected: (value) {
+                // TODO: Handle actions
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            PopupMenuItem(
-              value: 'logout',
-              child: Row(
-                children: const [
-                  FaIcon(FontAwesomeIcons.arrowRightFromBracket, size: 16),
-                  SizedBox(width: 10),
-                  Text('Logout'),
-                ],
-              ),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: Row(
+                    children: [
+                      FaIcon(FontAwesomeIcons.user, size: 16),
+                      SizedBox(width: 10),
+                      Text('Profile'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'settings',
+                  child: Row(
+                    children: [
+                      FaIcon(FontAwesomeIcons.gear, size: 16),
+                      SizedBox(width: 10),
+                      Text('Settings'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'help',
+                  child: Row(
+                    children: [
+                      FaIcon(FontAwesomeIcons.circleQuestion, size: 16),
+                      SizedBox(width: 10),
+                      Text('Help'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      FaIcon(FontAwesomeIcons.arrowRightFromBracket, size: 16),
+                      SizedBox(width: 10),
+                      Text('Logout'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../tutorial/tutorials_screen.dart';
 
-class PopularCoursesSection extends StatelessWidget {
-  const PopularCoursesSection({super.key});
+class PastQuestionSection extends StatelessWidget {
+  const PastQuestionSection({super.key});
 
-  final List<Map<String, String>> _popularCourses = const [
+  final List<Map<String, String>> _pastPapers = const [
     {
       'title': 'Business Law',
       'description': 'Master corporate regulations and legal strategy.',
@@ -22,6 +22,8 @@ class PopularCoursesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,19 +35,19 @@ class PopularCoursesSection extends StatelessWidget {
             fontFamily: 'OpenSans',
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Column(
-          children: _popularCourses.map((course) {
+          children: _pastPapers.map((course) {
             return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
                   BoxShadow(
-                    blurRadius: 4,
-                    offset: Offset(1, 2),
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
                     color: Colors.black12,
                   ),
                 ],
@@ -58,7 +60,7 @@ class PopularCoursesSection extends StatelessWidget {
                     color: Colors.redAccent,
                     size: 28,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,33 +68,41 @@ class PopularCoursesSection extends StatelessWidget {
                         Text(
                           course['title']!,
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           course['description']!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13.5,
-                            color: Colors.black87,
+                            color: Colors.grey[800],
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 10),
-                  IconButton(
-                      tooltip: 'Open Tutorial',
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: IconButton(
+                      tooltip: 'Open Past Question',
                       icon: const Icon(Icons.arrow_forward_ios_rounded,
-                          size: 20, color: Colors.blue),
+                          size: 18, color: Colors.blue),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const TutorialsScreen()),
+                            builder: (_) => const TutorialsScreen(),
+                          ),
                         );
-                      }),
+                      },
+                    ),
+                  ),
                 ],
               ),
             );
