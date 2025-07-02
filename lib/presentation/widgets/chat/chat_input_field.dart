@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 
 class ChatInputField extends StatelessWidget {
   final TextEditingController controller;

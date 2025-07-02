@@ -35,7 +35,7 @@ class WelcomeScreen extends StatelessWidget {
                   // App Logo
                   Image.asset(
                     'assets/images/splashscreen.png',
-                    height: 220,
+                    height: 200,
                   ),
 
                   const SizedBox(height: 25),
@@ -45,7 +45,7 @@ class WelcomeScreen extends StatelessWidget {
                     'Welcome to EasyLearning !!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 45,
+                      fontSize: 38,
                       fontFamily: 'Mulish-Medium',
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
@@ -55,14 +55,14 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 25),
 
                   // Subtitle
                   const Text(
                     'We are happy to have you here. EasyLearning accompanies in the preparation of your exams',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 22,
                       color: Colors.white70,
                     ),
                   ),
@@ -88,12 +88,12 @@ class WelcomeScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          elevation: 3,
+                          elevation: 2,
                         ),
                         child: const Text(
                           "Let's Get Started",
                           style: TextStyle(
-                            fontSize: 25,
+                            fontSize: 22,
                             color: Colors.blueAccent,
                             fontWeight: FontWeight.bold,
                           ),
@@ -102,7 +102,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 130),
+                  const SizedBox(height: 100),
                 ],
               ),
             ),

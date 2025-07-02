@@ -9,7 +9,7 @@ class EasyLearningApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'EasyLearning',
-      initialRoute: RoutePaths.splash,
+      initialRoute: RoutePaths.studentDashboard,
       onGenerateRoute: AppRouter.generateRoute,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -19,10 +19,10 @@ class EasyLearningApp extends StatelessWidget {
           secondary: Colors.lightBlueAccent,
         ),
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 198, 213, 235),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.blue,
           elevation: 2,
         ),
         textTheme: const TextTheme(

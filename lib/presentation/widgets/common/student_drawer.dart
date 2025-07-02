@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../presentation/screens/student/community_chat_screen.dart';
 
 class StudentDrawer extends StatelessWidget {
@@ -29,15 +28,6 @@ class StudentDrawer extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               children: [
-                ListTile(
-                  leading:
-                      const Icon(Icons.live_tv_rounded, color: Colors.blue),
-                  title: const Text('Live Class'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // TODO: Navigate to LiveClassScreen
-                  },
-                ),
                 ListTile(
                     leading: const Icon(Icons.chat_bubble_outline,
                         color: Colors.blueAccent),

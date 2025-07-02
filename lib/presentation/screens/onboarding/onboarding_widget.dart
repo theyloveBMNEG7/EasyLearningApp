@@ -86,7 +86,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
                         TextSpan(
                           text: widget.content.titleStart,
                           style: const TextStyle(
-                            fontSize: 32,
+                            fontSize: 25,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -105,7 +105,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
                         widget.content.subtitle,
                         style: const TextStyle(
                           color: Color.fromARGB(136, 0, 0, 0),
-                          fontSize: 18,
+                          fontSize: 17,
                         ),
                       ),
                     ],

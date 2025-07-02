@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:easylearningapp/core/constants/routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});
@@ -58,7 +60,16 @@ class HeaderSection extends StatelessWidget {
             IconButton(
               icon: const FaIcon(FontAwesomeIcons.bell, size: 18),
               onPressed: () {
-                Navigator.pushNamed(context, '/notifications');
+                final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+                Navigator.pushNamed(
+                  context,
+                  RoutePaths.notifications,
+                  arguments: {
+                    'userRole': 'student',
+                    'userId': userId,
+                  },
+                );
               },
               tooltip: "Notifications",
               splashRadius: 20,

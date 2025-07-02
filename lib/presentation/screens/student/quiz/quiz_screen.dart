@@ -16,7 +16,7 @@ class QuizScreen extends StatelessWidget {
           'Quizzes',
           style: TextStyle(
               color: Colors.blue,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w600,
               fontSize: 25,
               fontFamily: 'OpenSans'),
         ),
@@ -32,7 +32,7 @@ class QuizScreen extends StatelessWidget {
             const Text(
               'Choose your preferred quiz style',
               style: TextStyle(
-                  fontSize: 21, color: Colors.black87, fontFamily: 'OpenSans'),
+                  fontSize: 21, color: Colors.black54, fontFamily: 'OpenSans'),
             ),
             const SizedBox(height: 45),
 

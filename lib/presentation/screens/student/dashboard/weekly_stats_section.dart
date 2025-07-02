@@ -102,8 +102,9 @@ class _WeeklyStatsSectionState extends State<WeeklyStatsSection> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, _) {
-                          if (value < 0 || value > 6)
+                          if (value < 0 || value > 6) {
                             return const SizedBox.shrink();
+                          }
                           return Text(
                             _days[value.toInt()],
                             style: const TextStyle(fontSize: 12),

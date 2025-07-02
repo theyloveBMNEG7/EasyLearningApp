@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'signin_screen.dart';
+import '../../../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -11,12 +12,46 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   String? _selectedExam;
+  String? _selectedSpeciality;
+  String? _selectedOption;
+
   bool _obscurePassword = true;
   bool _agreedToTerms = false;
+  bool _isLoading = false;
+
+  final _authService = AuthService();
+
+  final Map<String, Map<String, List<String>>> examData = {
+    "HND": {
+      "Computer Engineering": [
+        "Computer Hardware Engineering",
+        "Networking & Telecommunications",
+        "Systems Security & Cybersecurity",
+      ],
+      "Computer Science": [
+        "Software Engineering",
+        "Database Management",
+        "Web Development & E-Commerce",
+      ],
+    },
+    "BTS": {
+      "Comptabilité et Gestion": [
+        "Gestion Financière",
+        "Audit et Contrôle de Gestion",
+        "Fiscalité",
+      ],
+      "Management Commercial": [
+        "Marketing Digital",
+        "Négociation et Relation Client",
+        "Commerce International",
+      ],
+    },
+  };
 
   void _handleSocialLogin(String platform) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -30,34 +65,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate() && _agreedToTerms) {
-      _showSignupProgressPopup();
+      if (_selectedExam == null ||
+          _selectedSpeciality == null ||
+          _selectedOption == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Please select exam, speciality and option')),
+        );
+        return;
+      }
+
+      setState(() => _isLoading = true);
+
+      try {
+        final newUser = await _authService.registerStudent(
+          fullName: _fullNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          examType: _selectedExam!,
+          speciality: _selectedSpeciality!,
+          option: _selectedOption!,
+        );
+
+        setState(() => _isLoading = false);
+
+        if (newUser != null) {
+          _showAccountCreatedPopup();
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signup error: ${e.toString()}')),
+        );
+      }
     } else if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please agree to terms & conditions')),
+        const SnackBar(content: Text('Please accept Terms & Conditions')),
       );
     }
-  }
-
-  void _showSignupProgressPopup() async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(color: Colors.blue),
-            SizedBox(height: 20),
-            Text('Creating Account...'),
-          ],
-        ),
-      ),
-    );
-    await Future.delayed(const Duration(seconds: 2));
-    Navigator.pop(context);
-    _showAccountCreatedPopup();
   }
 
   void _showAccountCreatedPopup() async {
@@ -88,7 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black54),
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
         backgroundColor: Colors.white,
@@ -120,12 +167,84 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _buildTextField(
                   label: 'Full Name',
                   hintText: 'Enter your full name',
-                  controller: _nameController,
+                  controller: _fullNameController,
                   icon: Icons.person,
                   validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 25),
-                _buildDropdownField(),
+                DropdownButtonFormField<String>(
+                  isDense: true,
+                  value: _selectedExam,
+                  decoration: InputDecoration(
+                    labelText: 'Select Your Exam',
+                    hintText: 'Choose one',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  ),
+                  items: ['HND', 'BTS', 'Other']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (v) => setState(() {
+                    _selectedExam = v;
+                    _selectedSpeciality = null;
+                    _selectedOption = null;
+                  }),
+                  validator: (v) => v == null ? 'Please select an exam' : null,
+                ),
+                const SizedBox(height: 25),
+                if (_selectedExam != null &&
+                    examData.containsKey(_selectedExam))
+                  DropdownButtonFormField<String>(
+                    isDense: true,
+                    value: _selectedSpeciality,
+                    decoration: InputDecoration(
+                      labelText: 'Select Speciality',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                    ),
+                    items: examData[_selectedExam]!
+                        .keys
+                        .map((spec) =>
+                            DropdownMenuItem(value: spec, child: Text(spec)))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedSpeciality = val;
+                        _selectedOption = null;
+                      });
+                    },
+                    validator: (v) =>
+                        v == null ? 'Please select a speciality' : null,
+                  ),
+                if (_selectedExam != null && _selectedSpeciality != null)
+                  const SizedBox(height: 25),
+                if (_selectedSpeciality != null &&
+                    _selectedExam != null &&
+                    examData[_selectedExam]!.containsKey(_selectedSpeciality))
+                  DropdownButtonFormField<String>(
+                    isDense: true,
+                    value: _selectedOption,
+                    decoration: InputDecoration(
+                      labelText: 'Select Option',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                    ),
+                    items: examData[_selectedExam]![_selectedSpeciality]!
+                        .map((option) => DropdownMenuItem(
+                            value: option, child: Text(option)))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() => _selectedOption = val);
+                    },
+                    validator: (v) =>
+                        v == null ? 'Please select an option' : null,
+                  ),
                 const SizedBox(height: 25),
                 _buildTextField(
                     label: 'Email Address',
@@ -201,24 +320,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ],
                 ),
                 const SizedBox(height: 25),
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 55),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    backgroundColor: const Color.fromARGB(255, 0, 110, 201),
-                  ),
-                  child: const Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontFamily: 'Mulish-Medium',
-                    ),
-                  ),
-                ),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _submitForm,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          backgroundColor:
+                              const Color.fromARGB(255, 0, 110, 201),
+                        ),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontFamily: 'Mulish-Medium',
+                          ),
+                        ),
+                      ),
                 const SizedBox(height: 45),
                 const Text(
                   'Or Sign Up with',
@@ -276,15 +398,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller,
-      required String label,
-      required String hintText,
-      IconData? icon,
-      TextInputType keyboardType = TextInputType.text,
-      String? Function(String?)? validator,
-      TextInputAction? textInputAction,
-      void Function(String)? onFieldSubmitted}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hintText,
+    IconData? icon,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+    TextInputAction? textInputAction,
+    void Function(String)? onFieldSubmitted,
+  }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -302,32 +425,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildDropdownField() {
-    return DropdownButtonFormField<String>(
-      isDense: true,
-      value: _selectedExam,
-      decoration: InputDecoration(
-        labelText: 'Select Your Exam',
-        hintText: 'Choose one',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      ),
-      items: ['HND', 'BTS', 'Other']
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
-      onChanged: (v) => setState(() => _selectedExam = v),
-      validator: (v) => v == null ? 'Please select an exam' : null,
-    );
-  }
-
   Widget _buildPasswordField() {
     return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
-      textInputAction: TextInputAction.done, // Show "Done" on keyboard
+      textInputAction: TextInputAction.done,
       onFieldSubmitted: (_) {
         if (_formKey.currentState!.validate() && _agreedToTerms) {
-          _submitForm(); // Trigger form submit when Enter is pressed
+          _submitForm();
         }
       },
       validator: (v) {

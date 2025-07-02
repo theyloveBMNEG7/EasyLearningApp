@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
-import '../../../core/utils/local_storage.dart';
+import '../../../core/utils/local_message_storage.dart';
 import '../../../data/models/chat_message.dart';
 import '../../widgets/chat/chat_input_field.dart';
 import '../../widgets/chat/chat_message_bubble.dart';
@@ -31,7 +31,7 @@ class _CommunityChatScreenState extends State<CommunityChatScreen> {
   }
 
   Future<void> _loadDeletedMessages() async {
-    _deletedMessageIds = await LocalStorage.getDeletedMessages();
+    _deletedMessageIds = await LocalMessageStorage.getDeletedMessages();
     setState(() {});
   }
 
@@ -81,7 +81,7 @@ class _CommunityChatScreenState extends State<CommunityChatScreen> {
   }
 
   void _deleteMessageForMe(String id) async {
-    await LocalStorage.addDeletedMessage(id);
+    await LocalMessageStorage.addDeletedMessage(id);
     _deletedMessageIds.add(id);
     setState(() {});
   }

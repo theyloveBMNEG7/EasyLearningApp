@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../../screens/student/dashboard/student_dashboard.dart';
 import '../../screens/student/tutorial/tutorials_screen.dart';
 import '../../screens/student/quiz/quiz_screen.dart';
-import '../../screens/student/corrections_screen.dart';
-import '../../screens/student/student_profile.dart';
+import '../../screens/student/past_questions/past_question_home_screen.dart';
 import '../../../presentation/widgets/common/student_drawer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentLayout extends StatefulWidget {
   final int initialIndex;
@@ -25,11 +25,11 @@ class _StudentLayoutState extends State<StudentLayout> {
     _index = widget.initialIndex;
   }
 
-  final List<Widget> _tabs = const [
+  final List<Widget> _tabs = [
     StudentDashboard(),
     TutorialsScreen(),
     QuizScreen(),
-    //CorrectionsScreen(),
+    PastQuestionHomeScreen(),
     //StudentProfile(),
   ];
 

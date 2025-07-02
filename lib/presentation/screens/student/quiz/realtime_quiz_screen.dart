@@ -27,7 +27,7 @@ class _RealtimeQuizScreenState extends State<RealtimeQuizScreen> {
   int _currentIndex = 0;
   String? _selectedOption;
   bool _answered = false;
-  Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch();
   String _answerFeedback = '';
 
   Color? _optionColor(String option) {

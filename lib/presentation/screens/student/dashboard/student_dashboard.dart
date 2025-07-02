@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:easylearningapp/presentation/widgets/common/student_drawer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'header_section.dart';
 import 'recent_courses_section.dart';
 import 'weekly_stats_section.dart';
 import 'popular_course_section.dart';
 import 'past_question_section.dart';
+import '../../../widgets/live_class/upcoming_class_section.dart';
+//import '../../../widgets/live_class/join_link_bar.dart';
 
 class StudentDashboard extends StatelessWidget {
   const StudentDashboard({super.key});
@@ -19,30 +22,20 @@ class StudentDashboard extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           children: const [
-            // Header (Greeting + Avatar + Actions)
             HeaderSection(),
-
             SizedBox(height: 25),
-
-            // Recently Accessed Courses
             RecentCoursesSection(),
-
             SizedBox(height: 30),
-
-            // Weekly Activity Overview (quiz stats, hours studied, etc.)
+            UpcomingClassSection(),
+            SizedBox(height: 26),
+            // JoinLinkBar(),
+            SizedBox(height: 20),
             WeeklyStatsSection(),
-
             SizedBox(height: 26),
-
-            // Popular Courses Recommendation
             PopularCoursesSection(),
-
             SizedBox(height: 26),
-
-            // Past Questions by Subject or Date
             PastQuestionSection(),
-
-            SizedBox(height: 26),
+            SizedBox(height: 30),
           ],
         ),
       ),

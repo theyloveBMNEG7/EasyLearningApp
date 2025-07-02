@@ -97,7 +97,7 @@ class PastQuestionSection extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const TutorialsScreen(),
+                            builder: (_) => TutorialsScreen(),
                           ),
                         );
                       },

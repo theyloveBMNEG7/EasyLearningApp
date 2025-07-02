@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "563174569553",
+    "project_id": "btech3-cse",
+    "storage_bucket": "btech3-cse.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563174569553:android:77411cacb4019576132a70",
+        "android_client_info": {
+          "package_name": "com.example.easylearningapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563174569553-r52pu7uaodmq9o8kkr1osg25crfhptd8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUtDOGSiVRhFWGUkXSFONxPT3sVaCdpk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563174569553-r52pu7uaodmq9o8kkr1osg25crfhptd8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

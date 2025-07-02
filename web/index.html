@@ -23,12 +23,39 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="easylearningapp">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+<!-- Add inside <head> -->
+  <script src="https://cdn.syncfusion.com/ej2/20.2.36/dist/ej2.min.js"></script>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png">
 
   <title>easylearningapp</title>
   <link rel="manifest" href="manifest.json">
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyB73EHIrYFB_wsZHg-WLRRANw2U50OWMfg",
+  authDomain: "btech3-cse.firebaseapp.com",
+  projectId: "btech3-cse",
+  storageBucket: "btech3-cse.firebasestorage.app",
+  messagingSenderId: "563174569553",
+  appId: "1:563174569553:web:33a77617c4c97264132a70",
+  measurementId: "G-TRHMPK83NM"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+</script>
+
   <style id="splash-screen-style">
     html {
       height: 100%
