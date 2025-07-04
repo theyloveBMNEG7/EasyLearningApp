@@ -1,3 +1,4 @@
+import 'package:easylearningapp/presentation/screens/student/ai_tutor_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../core/constants/routes.dart';
@@ -13,6 +14,8 @@ import '../presentation/screens/teacher/live class/schedule_class_screen.dart';
 import '../presentation/screens//student/live_class/join_live_class_screen.dart';
 import '../presentation/screens/admin/admin_class_monitor.dart';
 import '../presentation/screens/notifications/notification_screen.dart';
+import '../presentation/screens/student/tutorial/tutorial_home_screen.dart';
+
 //import '../presentation/layouts/admin/admin_layout.dart';
 
 class AppRouter {
@@ -46,6 +49,8 @@ class AppRouter {
 
       case RoutePaths.hostClass:
         return _fadeRoute(const HostClassScreen());
+      case RoutePaths.tutorialHome:
+        return _fadeRoute(const TutorialHomeScreen());
 
       case RoutePaths.joinLiveClass:
         return _fadeRoute(const JoinLiveClassScreen());
@@ -56,6 +61,8 @@ class AppRouter {
           userRole: args['userRole'],
           userId: args['userId'],
         ));
+      case RoutePaths.aiTutor:
+        return _fadeRoute(const AiTutorScreen());
 
       case RoutePaths.adminDashboard:
       //  return _fadeRoute(const AdminLayout());

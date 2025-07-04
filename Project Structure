@@ -1,0 +1,32 @@
+easylearningapp/
+├── android/                 # Android-specific files
+├── ios/                     # iOS-specific files
+├── linux/                   # Linux-specific files
+├── build/                   # Build artifacts
+├── lib/
+│   ├── app.dart             # Main app configuration
+│   ├── main.dart            # Entry point
+│   ├── core/
+│   │   └── constants/
+│   │       └── routes.dart  # Route constants
+│   ├── presentation/
+│   │   ├── layouts/
+│   │   │   ├── student/     # Student layout components
+│   │   │   └── teacher_layout.dart
+│   │   ├── screens/
+│   │   │   ├── admin/       # Admin screens
+│   │   │   ├── auth/        # Authentication screens
+│   │   │   ├── onboarding/  # Onboarding screens
+│   │   │   ├── splash/      # Splash screens
+│   │   │   ├── student/     # Student-specific screens
+│   │   │   ├── teacher/     # Teacher-specific screens
+│   │   │   └── welcome/     # Welcome screens
+│   │   └── widgets/
+│   │       └── common/      # Shared widgets
+│   ├── routes/
+│   │   └── app_router.dart  # Route definitions
+│   └── services/
+│       └── auth_service.dart # Authentication service
+├── pubspec.yaml             # Dependencies
+├── firebase.json            # Firebase configuration
+└── .firebaserc              # Firebase project settings

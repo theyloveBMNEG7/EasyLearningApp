@@ -1,74 +1,138 @@
 import 'package:flutter/material.dart';
-import 'package:easylearningapp/core/constants/routes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-class UpcomingClassesSection extends StatelessWidget {
-  const UpcomingClassesSection({super.key});
+class UpcomingClassSection extends StatelessWidget {
+  final String? userId;
+  final String? level;
+  final String? department;
+
+  const UpcomingClassSection({
+    super.key,
+    this.userId,
+    this.level,
+    this.department,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Dummy upcoming classes list
-    final classes = [
-      {'subject': 'Mathematics', 'date': '2025-07-02', 'time': '10:00 AM'},
-      {'subject': 'Programming', 'date': '2025-07-04', 'time': '2:00 PM'},
-      {'subject': 'Data Science', 'date': '2025-07-05', 'time': '11:00 AM'},
-    ];
+    final now = DateTime.now();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Upcoming Live Classes',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenSans',
+              color: Colors.black,
+            ),
           ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Upcoming Classes",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ListView.separated(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: classes.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final liveClass = classes[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                leading: const Icon(Icons.video_call, color: Colors.lightBlue),
-                title: Text(
-                  liveClass['subject']!,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text('${liveClass['date']} • ${liveClass['time']}'),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, RoutePaths.hostClass);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightBlue,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(60),
+        ),
+        const SizedBox(height: 8),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('schedules')
+              .where('level', isEqualTo: level)
+              .orderBy('scheduled_at')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data!.docs.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final scheduledAt = DateTime.tryParse(data['scheduled_at'] ?? '');
+              return scheduledAt != null && scheduledAt.isAfter(now);
+            }).toList();
+
+            if (docs.isEmpty) {
+              return const Center(child: Text('No upcoming classes.'));
+            }
+
+            return Column(
+              children: docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final subject = data['subject'] ?? 'Untitled';
+                final note = data['note'] ?? '';
+                final scheduledAt = DateTime.parse(data['scheduled_at']);
+                final timeUntil = scheduledAt.difference(now);
+
+                String relativeTime;
+                if (timeUntil.inMinutes < 60) {
+                  relativeTime = 'in ${timeUntil.inMinutes} min';
+                } else {
+                  final hours = timeUntil.inHours;
+                  final mins = timeUntil.inMinutes % 60;
+                  relativeTime =
+                      'in $hours hr${hours > 1 ? 's' : ''} ${mins > 0 ? '$mins min' : ''}';
+                }
+
+                final formattedTime =
+                    DateFormat('EEE, MMM d • hh:mm a').format(scheduledAt);
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    leading: const Icon(Icons.live_tv_rounded,
+                        color: Colors.lightBlueAccent, size: 32),
+                    title: Text(
+                      subject,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '$formattedTime • $relativeTime\n$note',
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    trailing: ElevatedButton.icon(
+                      onPressed: () {
+                        // TODO: Navigate to live session or class details
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlue,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                      icon: const Icon(
+                        Icons.play_arrow,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'Join',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
-                  child:
-                      const Text('Join', style: TextStyle(color: Colors.white)),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 }

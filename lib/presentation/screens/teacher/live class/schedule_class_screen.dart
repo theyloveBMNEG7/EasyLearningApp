@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ScheduleClassScreen extends StatefulWidget {
   const ScheduleClassScreen({super.key});
@@ -19,12 +20,59 @@ class _ScheduleClassScreenState extends State<ScheduleClassScreen> {
 
   final List<String> levels = ['L1', 'L2', 'HND1', 'HND2', 'BTS1', 'BTS2'];
 
+  Future<void> _submitSchedule() async {
+    if (_formKey.currentState!.validate() &&
+        _selectedDate != null &&
+        _selectedTime != null) {
+      try {
+        final DateTime fullDateTime = DateTime(
+          _selectedDate!.year,
+          _selectedDate!.month,
+          _selectedDate!.day,
+          _selectedTime!.hour,
+          _selectedTime!.minute,
+        );
+
+        final scheduleData = {
+          'subject': _subjectController.text.trim(),
+          'note': _noteController.text.trim(),
+          'level': _selectedLevel,
+          'scheduled_at': fullDateTime.toIso8601String(),
+          'created_at': DateTime.now().toIso8601String(),
+        };
+
+        await FirebaseFirestore.instance
+            .collection('schedules')
+            .add(scheduleData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Class scheduled successfully")),
+        );
+
+        _formKey.currentState!.reset();
+        setState(() {
+          _selectedDate = null;
+          _selectedTime = null;
+          _selectedLevel = null;
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Failed to schedule class: $e")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ Please complete all fields")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Full screen background
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: false, // ❌ Removes back arrow
+        automaticallyImplyLeading: false,
         title: const Text(
           "Schedule Live Class",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
@@ -68,13 +116,7 @@ class _ScheduleClassScreenState extends State<ScheduleClassScreen> {
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Class scheduled")),
-                          );
-                        }
-                      },
+                      onPressed: _submitSchedule,
                       icon: const Icon(Icons.schedule, color: Colors.white),
                       label: const Text(
                         "Schedule Class",

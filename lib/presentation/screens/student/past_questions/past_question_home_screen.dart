@@ -52,7 +52,7 @@ class _PastQuestionHomeScreenState extends State<PastQuestionHomeScreen>
               indicatorColor: theme.colorScheme.primary,
               tabs: const [
                 Tab(text: 'Questions'),
-                Tab(text: 'Reviewed'),
+                Tab(text: 'Corrections'),
               ],
             ),
           ),

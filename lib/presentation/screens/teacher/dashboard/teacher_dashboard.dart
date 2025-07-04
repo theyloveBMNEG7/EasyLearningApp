@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'header_section.dart';
 import 'quick_actions_bar.dart';
 import 'recent_uploads_section.dart';
-import 'upcoming_classes_section.dart';
+import '../dashboard/upcoming_classes_section.dart';
 
 class TeacherDashboardScreen extends StatelessWidget {
   const TeacherDashboardScreen({super.key});
@@ -26,7 +26,7 @@ class TeacherDashboardScreen extends StatelessWidget {
             SizedBox(height: 15),
             RecentUploadsSection(),
             SizedBox(height: 26),
-            UpcomingClassesSection(),
+            UpcomingClassSection(),
             SizedBox(height: 30),
           ],
         ),

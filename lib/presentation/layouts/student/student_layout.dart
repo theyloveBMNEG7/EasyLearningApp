@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../screens/student/dashboard/student_dashboard.dart';
-import '../../screens/student/tutorial/tutorials_screen.dart';
+import '../../screens/student/tutorial/tutorial_home_screen.dart';
 import '../../screens/student/quiz/quiz_screen.dart';
 import '../../screens/student/past_questions/past_question_home_screen.dart';
 import '../../../presentation/widgets/common/student_drawer.dart';
@@ -27,7 +27,7 @@ class _StudentLayoutState extends State<StudentLayout> {
 
   final List<Widget> _tabs = [
     StudentDashboard(),
-    TutorialsScreen(),
+    TutorialHomeScreen(),
     QuizScreen(),
     PastQuestionHomeScreen(),
     //StudentProfile(),

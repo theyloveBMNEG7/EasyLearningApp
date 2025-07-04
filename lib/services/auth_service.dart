@@ -6,7 +6,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Register Student
+  // 🔹 Register Student
   Future<AppUser?> registerStudent({
     required String fullName,
     required String email,
@@ -15,72 +15,77 @@ class AuthService {
     required String speciality,
     required String option,
   }) async {
-    try {
-      // 1. Create user with email & password
-      final UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    final UserCredential userCredential =
+        await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      final user = userCredential.user;
-      if (user == null) throw Exception('User creation failed');
+    final user = userCredential.user;
+    if (user == null) throw Exception('User creation failed');
 
-      // 2. Create AppUser model
-      final AppUser newUser = AppUser(
-        uid: user.uid,
-        email: email,
-        displayName: fullName,
-        role: 'student',
-        examType: examType,
-        speciality: speciality,
-        option: option,
-        profilePictureUrl: null,
-        createdAt: DateTime.now(),
-      );
+    final AppUser newUser = AppUser(
+      uid: user.uid,
+      email: email,
+      displayName: fullName,
+      role: 'student',
+      examType: examType,
+      speciality: speciality,
+      option: option,
+      profilePictureUrl: null,
+      createdAt: DateTime.now(),
+    );
 
-      // 3. Save user data to Firestore
-      await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
+    await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
 
-      return newUser;
-    } on FirebaseAuthException catch (e) {
-      print('FirebaseAuthException: ${e.code} - ${e.message}');
-      throw Exception(e.message);
-    } on FirebaseException catch (e) {
-      print('FirebaseException: ${e.code} - ${e.message}');
-      throw Exception(e.message);
-    } catch (e) {
-      print('Unknown error: $e');
-      throw Exception('An unknown error occurred');
-    }
+    return newUser;
   }
 
-  // Teachers only login — no registration here
+  // 🔹 Login for all roles
   Future<AppUser?> login({
     required String email,
     required String password,
   }) async {
-    try {
-      final UserCredential cred = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+    final UserCredential cred = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      final doc =
-          await _firestore.collection('users').doc(cred.user!.uid).get();
+    final doc = await _firestore.collection('users').doc(cred.user!.uid).get();
+    if (!doc.exists) throw Exception('User data not found');
 
-      if (!doc.exists) throw Exception('User data not found');
-
-      final user = AppUser.fromMap(doc.data()!);
-
-      return user;
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
-    }
+    final user = AppUser.fromMap(doc.data()!);
+    return user;
   }
 
+  // 🔹 Admin creates teacher
+  Future<void> createTeacher({
+    required String uid,
+    required String email,
+    required String displayName,
+    required String mappedExamType,
+    required String mappedSpeciality,
+  }) async {
+    final AppUser teacher = AppUser(
+      uid: uid,
+      email: email,
+      role: 'teacher',
+      displayName: displayName,
+      profilePictureUrl: null,
+      createdAt: DateTime.now(),
+      mappedExamType: mappedExamType,
+      mappedSpeciality: mappedSpeciality,
+    );
+
+    await _firestore.collection('users').doc(uid).set(teacher.toMap());
+  }
+
+  // 🔹 Logout
   Future<void> logout() async {
     await _auth.signOut();
   }
 
+  // 🔹 Get current user
   Future<AppUser?> getCurrentUser() async {
     final user = _auth.currentUser;
     if (user == null) return null;
@@ -90,4 +95,7 @@ class AuthService {
 
     return AppUser.fromMap(doc.data()!);
   }
+
+  // 🔹 Optional: Auth state stream
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

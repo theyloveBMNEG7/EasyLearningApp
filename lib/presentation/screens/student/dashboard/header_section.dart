@@ -4,11 +4,16 @@ import 'package:easylearningapp/core/constants/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HeaderSection extends StatelessWidget {
-  const HeaderSection({super.key});
+  const HeaderSection({super.key, required String userId});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = FirebaseAuth.instance.currentUser;
+
+    final displayName = user?.displayName ?? 'Student';
+    final email = user?.email ?? '';
+    final userId = user?.uid ?? '';
 
     return Builder(
       builder: (context) => Padding(
@@ -37,8 +42,8 @@ class HeaderSection extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     "Hi, welcome back.",
                     style: TextStyle(
                       fontSize: 13,
@@ -46,10 +51,17 @@ class HeaderSection extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Emmanuel",
-                    style: TextStyle(
+                    displayName,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    email,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -60,8 +72,6 @@ class HeaderSection extends StatelessWidget {
             IconButton(
               icon: const FaIcon(FontAwesomeIcons.bell, size: 18),
               onPressed: () {
-                final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-
                 Navigator.pushNamed(
                   context,
                   RoutePaths.notifications,

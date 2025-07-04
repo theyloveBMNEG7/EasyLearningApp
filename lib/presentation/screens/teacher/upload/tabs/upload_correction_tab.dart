@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../../data/models/correction_model.dart';
 import '../../../../../services/file_picker_service.dart';
 import '../../../../../services/firebase_storage_service.dart';
 import 'upload_common_widgets.dart';
@@ -17,6 +19,8 @@ class _UploadCorrectionTabState extends State<UploadCorrectionTab> {
   final _formKey = GlobalKey<FormState>();
   final _title = TextEditingController();
   final _description = TextEditingController();
+  final _subject = TextEditingController();
+  String? _selectedLevel;
 
   PickedFileResult? _pickedFile;
   bool _isUploading = false;
@@ -44,30 +48,43 @@ class _UploadCorrectionTabState extends State<UploadCorrectionTab> {
     setState(() => _isUploading = true);
 
     try {
-      final url = await _storageService.uploadFile(
+      final teacherId = FirebaseAuth.instance.currentUser?.uid;
+      if (teacherId == null) throw Exception('Not authenticated');
+
+      final pdfUrl = await _storageService.uploadFile(
         platformFile: _pickedFile!.platformFile,
-        folder: 'corrections',
+        folder: 'reviewed_questions',
       );
 
-      await FirebaseFirestore.instance.collection('corrections').add({
-        'title': _title.text.trim(),
-        'description': _description.text.trim(),
-        'pdfUrl': url,
-        'uploadedAt': FieldValue.serverTimestamp(),
-      });
+      final correction = CorrectionModel(
+        id: '',
+        title: _title.text.trim(),
+        description: _description.text.trim(),
+        subject: _subject.text.trim(),
+        level: _selectedLevel!,
+        pdfUrl: pdfUrl,
+        teacherId: teacherId,
+        createdAt: DateTime.now(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('reviewed_questions')
+          .add(correction.toMap());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Correction uploaded successfully!')),
+        const SnackBar(content: Text('✅ Correction uploaded successfully!')),
       );
 
       _title.clear();
       _description.clear();
+      _subject.clear();
       setState(() {
+        _selectedLevel = null;
         _pickedFile = null;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
+        SnackBar(content: Text('❌ Upload failed: $e')),
       );
     } finally {
       setState(() => _isUploading = false);
@@ -88,6 +105,24 @@ class _UploadCorrectionTabState extends State<UploadCorrectionTab> {
               buildTextField(_title, 'Title', Icons.title),
               buildTextField(_description, 'Description', Icons.description,
                   maxLines: 3),
+              buildTextField(_subject, 'Subject', Icons.subject),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: DropdownButtonFormField<String>(
+                  value: _selectedLevel,
+                  items: ["Year 1", "Year 2"]
+                      .map((lvl) =>
+                          DropdownMenuItem(value: lvl, child: Text(lvl)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedLevel = val),
+                  decoration: const InputDecoration(
+                    labelText: 'Level',
+                    prefixIcon: Icon(Icons.school),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => v == null ? 'Please select a level' : null,
+                ),
+              ),
               buildFilePicker(
                 _pickedFile == null
                     ? "Upload Correction PDF"

@@ -1,10 +1,10 @@
+import 'package:easylearningapp/presentation/layouts/admin_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../presentation/screens/welcome/welcome_screen.dart';
 import 'package:easylearningapp/presentation/screens/onboarding/onboarding_screen.dart';
 import '../../../presentation/layouts/student/student_layout.dart';
 import '../../../presentation/layouts/teacher_layout.dart';
-import '../../../presentation/screens/admin/admin_dashboard.dart';
 import '../../../services/auth_service.dart';
 
 class SplashDecider extends StatelessWidget {
@@ -26,7 +26,7 @@ class SplashDecider extends StatelessWidget {
         case 'teacher':
           return const TeacherLayout();
         case 'admin':
-          return const AdminDashboard();
+          return const AdminLayout();
         default:
           // Unknown role, logout and go to welcome
           await authService.logout();

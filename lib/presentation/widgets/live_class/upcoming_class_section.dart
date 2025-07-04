@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class UpcomingClassSection extends StatelessWidget {
-  const UpcomingClassSection({super.key});
+  final String userId;
+  final String? level;
+  final String? department;
+
+  const UpcomingClassSection({
+    super.key,
+    required this.userId,
+    this.level,
+    this.department,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final upcoming = [
-      {
-        'title': 'Algebra Basics',
-        'time': DateTime.now().add(const Duration(minutes: 45)),
-      },
-      {
-        'title': 'Chemistry Lab',
-        'time': DateTime.now().add(const Duration(hours: 2)),
-      },
-    ];
+    final now = DateTime.now();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,76 +34,104 @@ class UpcomingClassSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        ...upcoming.map((session) {
-          final time = session['time'] as DateTime;
-          final now = DateTime.now();
-          final timeUntil = time.difference(now);
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('schedules')
+              .where('level', isEqualTo: level)
+              .orderBy('scheduled_at')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          String relativeTime;
-          if (timeUntil.inMinutes < 60) {
-            relativeTime = 'in ${timeUntil.inMinutes} min';
-          } else {
-            final hours = timeUntil.inHours;
-            final mins = timeUntil.inMinutes % 60;
-            relativeTime =
-                'in $hours hr${hours > 1 ? 's' : ''} ${mins > 0 ? '$mins min' : ''}';
-          }
+            final docs = snapshot.data!.docs.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final scheduledAt = DateTime.tryParse(data['scheduled_at'] ?? '');
+              return scheduledAt != null && scheduledAt.isAfter(now);
+            }).toList();
 
-          final formattedTime = DateFormat('hh:mm a').format(time);
+            if (docs.isEmpty) {
+              return const Center(child: Text('No upcoming classes.'));
+            }
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blueAccent.withOpacity(0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              leading: const Icon(Icons.live_tv_rounded,
-                  color: Colors.lightBlueAccent, size: 32),
-              title: Text(
-                session['title'] as String,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              subtitle: Text(
-                '$formattedTime • $relativeTime',
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-              trailing: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Navigate to session
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlue,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-                icon: const Icon(
-                  Icons.play_arrow,
-                  size: 18,
-                  color: Colors.white,
-                ),
-                label: const Text(
-                  'Join',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          );
-        }),
+            return Column(
+              children: docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final subject = data['subject'] ?? 'Untitled';
+                final note = data['note'] ?? '';
+                final scheduledAt = DateTime.parse(data['scheduled_at']);
+                final timeUntil = scheduledAt.difference(now);
+
+                String relativeTime;
+                if (timeUntil.inMinutes < 60) {
+                  relativeTime = 'in ${timeUntil.inMinutes} min';
+                } else {
+                  final hours = timeUntil.inHours;
+                  final mins = timeUntil.inMinutes % 60;
+                  relativeTime =
+                      'in $hours hr${hours > 1 ? 's' : ''} ${mins > 0 ? '$mins min' : ''}';
+                }
+
+                final formattedTime =
+                    DateFormat('EEE, MMM d • hh:mm a').format(scheduledAt);
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    leading: const Icon(Icons.live_tv_rounded,
+                        color: Colors.lightBlueAccent, size: 32),
+                    title: Text(
+                      subject,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '$formattedTime • $relativeTime\n$note',
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    trailing: ElevatedButton.icon(
+                      onPressed: () {
+                        // TODO: Navigate to live session or class details
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlue,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                      icon: const Icon(
+                        Icons.play_arrow,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'Join',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
       ],
     );
   }

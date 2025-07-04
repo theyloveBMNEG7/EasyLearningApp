@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 
-import '../../../../../services/firebase_storage_service.dart';
-import '../../../../../services/file_picker_service.dart';
-import 'upload_common_widgets.dart';
+import '../../../../../data/models/book_model.dart';
+import '../../../../../services/book_service.dart';
+import 'upload_common_widgets.dart'; // Shared UI components
 
 class UploadCourseTab extends StatefulWidget {
-  const UploadCourseTab({super.key});
+  final String? teacherId;
+
+  const UploadCourseTab({super.key, this.teacherId});
 
   @override
   State<UploadCourseTab> createState() => _UploadCourseTabState();
@@ -15,29 +18,30 @@ class UploadCourseTab extends StatefulWidget {
 
 class _UploadCourseTabState extends State<UploadCourseTab> {
   final _formKey = GlobalKey<FormState>();
-  final _title = TextEditingController();
-  final _description = TextEditingController();
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
   String? _selectedLevel;
-
-  PickedFileResult? _pickedFile;
+  File? _selectedFile;
   bool _isUploading = false;
 
-  final _storageService = FirebaseStorageService();
-  final _pickerService = FilePickerService();
+  final List<String> levels = ['HND 1', 'HND 2', 'BTS 1', 'BTS 2'];
 
   Future<void> _pickFile() async {
-    final file = await _pickerService.pickPdfFile();
-    if (file != null) {
-      setState(() => _pickedFile = file);
+    final result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _selectedFile = File(result.files.single.path!);
+      });
     }
   }
 
-  Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_pickedFile == null) {
+  Future<void> _uploadCourse() async {
+    if (!_formKey.currentState!.validate() ||
+        _selectedLevel == null ||
+        _selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a PDF file to upload.')),
+        const SnackBar(content: Text('⚠️ Please complete all fields.')),
       );
       return;
     }
@@ -45,32 +49,36 @@ class _UploadCourseTabState extends State<UploadCourseTab> {
     setState(() => _isUploading = true);
 
     try {
-      final url = await _storageService.uploadFile(
-        platformFile: _pickedFile!.platformFile,
-        folder: 'courses',
-      );
+      // Upload PDF and get URL
+      final pdfUrl = await BookService.uploadPdf(_selectedFile!);
 
-      await FirebaseFirestore.instance.collection('courses').add({
-        'title': _title.text.trim(),
-        'description': _description.text.trim(),
+      // Prepare course data
+      final courseData = {
+        'title': _titleController.text.trim(),
+        'description': _descriptionController.text.trim(),
         'level': _selectedLevel,
-        'pdfUrl': url,
-        'uploadedAt': FieldValue.serverTimestamp(),
-      });
+        'pdfUrl': pdfUrl,
+        'teacherId': widget.teacherId,
+        'createdAt': DateTime.now().toIso8601String(),
+      };
+
+      // Save to Firestore
+      await FirebaseFirestore.instance.collection('courses').add(courseData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course uploaded successfully!')),
+        const SnackBar(content: Text('✅ Course uploaded successfully!')),
       );
 
-      _title.clear();
-      _description.clear();
+      // Reset form
+      _titleController.clear();
+      _descriptionController.clear();
       setState(() {
         _selectedLevel = null;
-        _pickedFile = null;
+        _selectedFile = null;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
+        SnackBar(content: Text('❌ Upload failed: $e')),
       );
     } finally {
       setState(() => _isUploading = false);
@@ -79,59 +87,63 @@ class _UploadCourseTabState extends State<UploadCourseTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Upload Course Material'),
+        backgroundColor: Colors.lightBlue,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: buildForm(
-            icon: FontAwesomeIcons.book,
-            label: "Course",
+            icon: Icons.book,
+            label: "Course Material",
             formContent: [
-              buildTextField(_title, 'Title', Icons.title),
-              buildTextField(_description, 'Description', Icons.description,
+              buildTextField(_titleController, "Title", Icons.title),
+              buildTextField(
+                  _descriptionController, "Description", Icons.description,
                   maxLines: 3),
-              DropdownButtonFormField<String>(
-                value: _selectedLevel,
-                items: ["Year 1", "Year 2"]
-                    .map(
-                        (lvl) => DropdownMenuItem(value: lvl, child: Text(lvl)))
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedLevel = val),
-                decoration: const InputDecoration(
-                  labelText: 'Level',
-                  prefixIcon: Icon(Icons.school),
-                  border: OutlineInputBorder(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: DropdownButtonFormField<String>(
+                  value: _selectedLevel,
+                  items: levels
+                      .map((level) => DropdownMenuItem(
+                            value: level,
+                            child: Text(level),
+                          ))
+                      .toList(),
+                  onChanged: (value) => setState(() => _selectedLevel = value),
+                  decoration: const InputDecoration(
+                    labelText: 'Level',
+                    prefixIcon: Icon(Icons.school),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value == null ? 'Please select a level' : null,
                 ),
-                validator: (v) => v == null ? 'Please select a level' : null,
               ),
               buildFilePicker(
-                _pickedFile == null
-                    ? "Upload Course PDF"
-                    : "Selected: ${_pickedFile!.fileName}",
-                Icons.upload_file,
+                _selectedFile != null ? "File Selected" : "Select PDF File",
+                Icons.attach_file,
                 _pickFile,
               ),
               const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _isUploading ? null : _submitForm,
-                icon: _isUploading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.cloud_upload),
-                label: Text(_isUploading ? "Uploading..." : "Submit"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isUploading ? Colors.grey : Colors.green,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-              ),
+              _isUploading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton.icon(
+                      onPressed: _uploadCourse,
+                      icon: const Icon(Icons.cloud_upload),
+                      label: const Text('Upload'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                    ),
             ],
           ),
         ),

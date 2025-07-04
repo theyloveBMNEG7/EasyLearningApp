@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'signin_screen.dart';
+import '../../../core/constants/routes.dart';
+import '../../../core/utils/validators.dart';
 import '../../../services/auth_service.dart';
+import '../../../data/models/user_model.dart';
+import '../auth/signin_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -12,57 +14,36 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _authService = AuthService();
+
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+  bool _isLoading = false;
+  bool _agreedToTerms = false;
 
   String? _selectedExam;
   String? _selectedSpeciality;
   String? _selectedOption;
 
-  bool _obscurePassword = true;
-  bool _agreedToTerms = false;
-  bool _isLoading = false;
-
-  final _authService = AuthService();
-
   final Map<String, Map<String, List<String>>> examData = {
     "HND": {
-      "Computer Engineering": [
-        "Computer Hardware Engineering",
-        "Networking & Telecommunications",
-        "Systems Security & Cybersecurity",
-      ],
-      "Computer Science": [
-        "Software Engineering",
-        "Database Management",
-        "Web Development & E-Commerce",
-      ],
+      "Computer Engineering": ["Software Engineering", "Networking"],
+      "Electrical Engineering": ["Power Systems", "Electronics"],
     },
     "BTS": {
-      "Comptabilité et Gestion": [
-        "Gestion Financière",
-        "Audit et Contrôle de Gestion",
-        "Fiscalité",
-      ],
-      "Management Commercial": [
-        "Marketing Digital",
-        "Négociation et Relation Client",
-        "Commerce International",
-      ],
+      "Management": ["Accounting", "Marketing"],
+      "Tourism": ["Hotel Management", "Travel Agency"],
+    },
+    "Other": {
+      "General": ["Option A", "Option B"],
     },
   };
 
-  void _handleSocialLogin(String platform) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Attempting to sign in with $platform...')),
-    );
-  }
-
   void _togglePasswordVisibility() {
-    setState(() {
-      _obscurePassword = !_obscurePassword;
-    });
+    setState(() => _obscurePassword = !_obscurePassword);
   }
 
   Future<void> _submitForm() async {
@@ -123,11 +104,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
     await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
     Navigator.pop(context);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const SigninScreen()),
-    );
+    Navigator.pushReplacementNamed(context, RoutePaths.signin);
   }
 
   @override
@@ -158,12 +137,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const Text(
                   'Create an account',
                   style: TextStyle(
-                    fontSize: 35,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'OpenSans',
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 45),
+                const SizedBox(height: 30),
                 _buildTextField(
                   label: 'Full Name',
                   hintText: 'Enter your full name',
@@ -171,139 +149,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   icon: Icons.person,
                   validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 ),
-                const SizedBox(height: 25),
-                DropdownButtonFormField<String>(
-                  isDense: true,
-                  value: _selectedExam,
-                  decoration: InputDecoration(
-                    labelText: 'Select Your Exam',
-                    hintText: 'Choose one',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                  items: ['HND', 'BTS', 'Other']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (v) => setState(() {
-                    _selectedExam = v;
-                    _selectedSpeciality = null;
-                    _selectedOption = null;
-                  }),
-                  validator: (v) => v == null ? 'Please select an exam' : null,
-                ),
-                const SizedBox(height: 25),
-                if (_selectedExam != null &&
-                    examData.containsKey(_selectedExam))
-                  DropdownButtonFormField<String>(
-                    isDense: true,
-                    value: _selectedSpeciality,
-                    decoration: InputDecoration(
-                      labelText: 'Select Speciality',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
-                    ),
-                    items: examData[_selectedExam]!
-                        .keys
-                        .map((spec) =>
-                            DropdownMenuItem(value: spec, child: Text(spec)))
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedSpeciality = val;
-                        _selectedOption = null;
-                      });
-                    },
-                    validator: (v) =>
-                        v == null ? 'Please select a speciality' : null,
-                  ),
-                if (_selectedExam != null && _selectedSpeciality != null)
-                  const SizedBox(height: 25),
-                if (_selectedSpeciality != null &&
-                    _selectedExam != null &&
-                    examData[_selectedExam]!.containsKey(_selectedSpeciality))
-                  DropdownButtonFormField<String>(
-                    isDense: true,
-                    value: _selectedOption,
-                    decoration: InputDecoration(
-                      labelText: 'Select Option',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
-                    ),
-                    items: examData[_selectedExam]![_selectedSpeciality]!
-                        .map((option) => DropdownMenuItem(
-                            value: option, child: Text(option)))
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() => _selectedOption = val);
-                    },
-                    validator: (v) =>
-                        v == null ? 'Please select an option' : null,
-                  ),
-                const SizedBox(height: 25),
-                _buildTextField(
-                    label: 'Email Address',
-                    hintText: 'e.g. John.doe@gmail.com',
-                    controller: _emailController,
-                    icon: Icons.email,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Email is required';
-                      }
-
-                      final email = value.trim().toLowerCase();
-
-                      // Basic email pattern with common domains
-                      final basicPattern =
-                          r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|io|co|cm|info)$";
-                      final regex = RegExp(basicPattern);
-
-                      // Block common problematic prefixes or banned terms
-                      final blockedPatterns = [
-                        RegExp(r'^sa@'),
-                        RegExp(r'^admin@'),
-                        RegExp(r'^test@'),
-                        RegExp(r'^example@'),
-                        RegExp(r'^noreply@'),
-                        RegExp(r'^null@'),
-                        RegExp(r'^invalid@'),
-                      ];
-
-                      // Allowlist specific domains (optional, for strict control)
-                      final allowedDomains = [
-                        'gmail.com',
-                        'yahoo.com',
-                        'outlook.com',
-                        'student.edu.cm'
-                      ];
-
-                      if (!regex.hasMatch(email)) {
-                        return 'Enter a valid email address';
-                      }
-
-                      if (blockedPatterns
-                          .any((pattern) => pattern.hasMatch(email))) {
-                        return 'This email address is not allowed';
-                      }
-
-                      // Optional strict domain filtering
-                      final domain = email.split('@').last;
-                      if (!allowedDomains.contains(domain)) {
-                        return 'Only emails from approved domains are allowed';
-                      }
-
-                      return null;
-                    }),
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
+                _buildEmailField(),
+                const SizedBox(height: 20),
                 _buildPasswordField(),
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
+                _buildExamDropdown(),
+                const SizedBox(height: 20),
+                _buildSpecialityDropdown(),
+                const SizedBox(height: 20),
+                _buildOptionDropdown(),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Checkbox(
@@ -319,77 +175,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
                         onPressed: _submitForm,
                         style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 55),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          backgroundColor:
-                              const Color.fromARGB(255, 0, 110, 201),
+                          minimumSize: const Size(double.infinity, 50),
+                          backgroundColor: Colors.blue,
                         ),
-                        child: const Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontFamily: 'Mulish-Medium',
-                          ),
-                        ),
+                        child: const Text('Sign Up',
+                            style:
+                                TextStyle(fontSize: 18, color: Colors.white)),
                       ),
-                const SizedBox(height: 45),
-                const Text(
-                  'Or Sign Up with',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                const SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () => _handleSocialLogin('Facebook'),
-                      icon: _buildSocialIconButton(
-                          FontAwesomeIcons.facebookF, Colors.blue),
-                      tooltip: 'Login with Facebook',
-                    ),
-                    const SizedBox(width: 20),
-                    IconButton(
-                      onPressed: () => _handleSocialLogin('Google'),
-                      icon: _buildSocialIconButton(
-                          FontAwesomeIcons.google, Colors.red),
-                      tooltip: 'Login with Google',
-                    ),
-                    const SizedBox(width: 20),
-                    IconButton(
-                      onPressed: () => _handleSocialLogin('Apple'),
-                      icon: _buildSocialIconButton(
-                          FontAwesomeIcons.apple, Colors.black),
-                      tooltip: 'Login with Apple',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SigninScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Already have an account? Sign In',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -403,25 +201,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required String label,
     required String hintText,
     IconData? icon,
-    TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
-    TextInputAction? textInputAction,
-    void Function(String)? onFieldSubmitted,
   }) {
     return TextFormField(
       controller: controller,
-      keyboardType: keyboardType,
-      validator: validator,
-      textInputAction: textInputAction,
-      onFieldSubmitted: onFieldSubmitted,
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
         prefixIcon: icon != null ? Icon(icon) : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
+      validator: validator,
+    );
+  }
+
+  Widget _buildEmailField() {
+    return _buildTextField(
+      controller: _emailController,
+      label: 'Email',
+      hintText: 'example@gmail.com',
+      icon: Icons.email,
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Enter your email';
+        if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$').hasMatch(v)) {
+          return 'Enter a valid email';
+        }
+        return null;
+      },
     );
   }
 
@@ -429,20 +235,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
-      textInputAction: TextInputAction.done,
-      onFieldSubmitted: (_) {
-        if (_formKey.currentState!.validate() && _agreedToTerms) {
-          _submitForm();
-        }
-      },
-      validator: (v) {
-        if (v == null || v.length < 8) return 'Password must be 8+ chars';
-        if (v.contains(' ')) return 'No spaces allowed';
-        return null;
-      },
       decoration: InputDecoration(
         labelText: 'Password',
-        hintText: 'Enter your password',
         prefixIcon: const Icon(Icons.lock),
         suffixIcon: IconButton(
           icon:
@@ -450,20 +244,70 @@ class _SignUpScreenState extends State<SignUpScreen> {
           onPressed: _togglePasswordVisibility,
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        helperText:
-            'Minimum 8 characters. No spaces or special symbols allowed.',
-        helperStyle: const TextStyle(color: Colors.red),
       ),
+      validator: (v) {
+        if (v == null || v.length < 6) return 'Password must be 6+ characters';
+        return null;
+      },
     );
   }
 
-  Widget _buildSocialIconButton(IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: Icon(icon, color: Colors.white, size: 20),
+  Widget _buildExamDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedExam,
+      decoration: InputDecoration(
+        labelText: 'Select Exam',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      items: examData.keys
+          .map((exam) => DropdownMenuItem(value: exam, child: Text(exam)))
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedExam = value;
+          _selectedSpeciality = null;
+          _selectedOption = null;
+        });
+      },
+      validator: (v) => v == null ? 'Please select an exam' : null,
+    );
+  }
+
+  Widget _buildSpecialityDropdown() {
+    if (_selectedExam == null) return const SizedBox();
+    return DropdownButtonFormField<String>(
+      value: _selectedSpeciality,
+      decoration: InputDecoration(
+        labelText: 'Select Speciality',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      items: examData[_selectedExam]!
+          .keys
+          .map((spec) => DropdownMenuItem(value: spec, child: Text(spec)))
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedSpeciality = value;
+          _selectedOption = null;
+        });
+      },
+      validator: (v) => v == null ? 'Please select a speciality' : null,
+    );
+  }
+
+  Widget _buildOptionDropdown() {
+    if (_selectedSpeciality == null) return const SizedBox();
+    return DropdownButtonFormField<String>(
+      value: _selectedOption,
+      decoration: InputDecoration(
+        labelText: 'Select Option',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      items: examData[_selectedExam]![_selectedSpeciality]!
+          .map((opt) => DropdownMenuItem(value: opt, child: Text(opt)))
+          .toList(),
+      onChanged: (value) => setState(() => _selectedOption = value),
+      validator: (v) => v == null ? 'Please select an option' : null,
     );
   }
 }

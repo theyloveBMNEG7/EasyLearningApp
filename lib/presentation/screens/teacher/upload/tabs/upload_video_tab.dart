@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../../data/models/tutorial_model.dart';
 import '../../../../../services/firebase_storage_service.dart';
 import '../../../../../services/file_picker_service.dart';
 import 'upload_common_widgets.dart';
@@ -46,22 +48,32 @@ class _UploadVideoTabState extends State<UploadVideoTab> {
     setState(() => _isUploading = true);
 
     try {
-      final url = await _storageService.uploadFile(
+      final teacherId = FirebaseAuth.instance.currentUser?.uid;
+      if (teacherId == null) throw Exception('Not authenticated');
+
+      final videoUrl = await _storageService.uploadFile(
         platformFile: _pickedFile!.platformFile,
         folder: 'tutorials',
       );
 
-      await FirebaseFirestore.instance.collection('tutorials').add({
-        'title': _title.text.trim(),
-        'description': _description.text.trim(),
-        'subject': _subject.text.trim(),
-        'level': _selectedLevel,
-        'videoUrl': url,
-        'uploadedAt': FieldValue.serverTimestamp(),
-      });
+      final tutorial = TutorialModel(
+        id: '',
+        title: _title.text.trim(),
+        description: _description.text.trim(),
+        subject: _subject.text.trim(),
+        level: _selectedLevel!,
+        videoUrl: videoUrl,
+        teacherId: teacherId,
+        createdAt: DateTime.now(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('tutorials')
+          .add(tutorial.toMap());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tutorial video uploaded successfully!')),
+        const SnackBar(
+            content: Text('✅ Tutorial video uploaded successfully!')),
       );
 
       _title.clear();
@@ -73,7 +85,7 @@ class _UploadVideoTabState extends State<UploadVideoTab> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
+        SnackBar(content: Text('❌ Upload failed: $e')),
       );
     } finally {
       setState(() => _isUploading = false);
@@ -95,19 +107,22 @@ class _UploadVideoTabState extends State<UploadVideoTab> {
               buildTextField(_description, 'Description', Icons.description,
                   maxLines: 3),
               buildTextField(_subject, 'Subject', Icons.subject),
-              DropdownButtonFormField<String>(
-                value: _selectedLevel,
-                items: ["Year 1", "Year 2"]
-                    .map(
-                        (lvl) => DropdownMenuItem(value: lvl, child: Text(lvl)))
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedLevel = val),
-                decoration: const InputDecoration(
-                  labelText: 'Level',
-                  prefixIcon: Icon(Icons.school),
-                  border: OutlineInputBorder(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: DropdownButtonFormField<String>(
+                  value: _selectedLevel,
+                  items: ["Year 1", "Year 2"]
+                      .map((lvl) =>
+                          DropdownMenuItem(value: lvl, child: Text(lvl)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedLevel = val),
+                  decoration: const InputDecoration(
+                    labelText: 'Level',
+                    prefixIcon: Icon(Icons.school),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => v == null ? 'Please select a level' : null,
                 ),
-                validator: (v) => v == null ? 'Please select a level' : null,
               ),
               buildFilePicker(
                 _pickedFile == null

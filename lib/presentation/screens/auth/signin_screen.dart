@@ -19,7 +19,6 @@ class SigninScreen extends StatefulWidget {
 
 class _SigninScreenState extends State<SigninScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -51,6 +50,7 @@ class _SigninScreenState extends State<SigninScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('userRole', user.role);
+      await prefs.setString('userId', user.uid);
 
       if (!mounted) return;
 
@@ -75,9 +75,8 @@ class _SigninScreenState extends State<SigninScreen> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _handleSocialLogin(String platform) {
@@ -95,25 +94,12 @@ class _SigninScreenState extends State<SigninScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   CircleAvatar(
                     radius: 50,
                     backgroundImage:
                         const AssetImage('assets/images/Books.jpeg'),
                     backgroundColor: Colors.transparent,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 30),
                   const Text(
@@ -162,14 +148,11 @@ class _SigninScreenState extends State<SigninScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const ForgotPasswordScreen(),
-                          ),
+                              builder: (_) => const ForgotPasswordScreen()),
                         );
                       },
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.blue),
-                      ),
+                      child: const Text('Forgot Password?',
+                          style: TextStyle(color: Colors.blue)),
                     ),
                   ),
                   const SizedBox(height: 38),
@@ -198,10 +181,8 @@ class _SigninScreenState extends State<SigninScreen> {
                           ),
                         ),
                   const SizedBox(height: 28),
-                  const Text(
-                    'Or login with',
-                    style: TextStyle(fontSize: 15, color: Colors.black54),
-                  ),
+                  const Text('Or login with',
+                      style: TextStyle(fontSize: 15, color: Colors.black54)),
                   const SizedBox(height: 22),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -275,7 +256,7 @@ class _SigninScreenState extends State<SigninScreen> {
         icon: Icon(icon, color: Colors.white, size: 22),
         onPressed: onPressed,
         tooltip:
-            'Login with ${icon.codePoint == FontAwesomeIcons.google.codePoint ? "Google" : icon.codePoint == FontAwesomeIcons.facebookF.codePoint ? "Facebook" : "Apple"}',
+            'Login with ${icon == FontAwesomeIcons.google ? "Google" : icon == FontAwesomeIcons.facebookF ? "Facebook" : "Apple"}',
       ),
     );
   }

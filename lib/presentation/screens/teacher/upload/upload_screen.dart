@@ -1,4 +1,3 @@
-// lib/presentation/screens/teacher/upload_screen.dart
 import 'package:flutter/material.dart';
 import 'tabs/upload_course_tab.dart';
 import 'tabs/upload_correction_tab.dart';

@@ -1,6 +1,7 @@
+import 'package:easylearningapp/presentation/screens/student/past_questions/past_question_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../tutorial/tutorials_screen.dart';
+import '../tutorial/video_tutorials_screen.dart';
 
 class PastQuestionSection extends StatelessWidget {
   const PastQuestionSection({super.key});
@@ -97,7 +98,7 @@ class PastQuestionSection extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => TutorialsScreen(),
+                            builder: (_) => PastQuestionScreen(),
                           ),
                         );
                       },
